@@ -1,14 +1,16 @@
 using System;
 using System.Text;
 using DiegoG.DungeonRogue.Data;
+using DiegoG.DungeonRogue.GameComponents.Base;
 using DiegoG.MonoGame.Extended;
 using GLV.Shared.Common;
+using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.Graphics;
 using Serilog;
 
-namespace DiegoG.DungeonRogue.Components;
+namespace DiegoG.DungeonRogue.GameComponents;
 
 public class PlayerCharacterComponent : CharacterComponent
 {
@@ -28,7 +30,13 @@ public class PlayerCharacterComponent : CharacterComponent
     protected override void DirectionChanged()
     {
         if (Sprite is null) return;
-        Sprite.Effect = FacingDirection.X < 0 ? SpriteEffects.FlipHorizontally : default;
+        
+        Sprite.Effect = FacingDirection.X switch
+        {
+            < 0 => SpriteEffects.FlipHorizontally,
+            > 0 => default,
+            _ => Sprite.Effect
+        };
     }
 
     protected override void MovedChanged()
@@ -63,11 +71,11 @@ public class PlayerCharacterComponent : CharacterComponent
         Sprite = AssetHelpers.PlayerCharacterAnimation(texname, AnimationIndexModifier);
     }
 
-    protected internal override void DebugDump(StringBuilder sb, int tabs)
+    public override void RenderImGuiDebug()
     {
-        base.DebugDump(sb, tabs);
+        base.RenderImGuiDebug();
         
-        sb.AppendTabs(tabs).Append("Class: ").Append(Enum.GetName(Class)).AppendLine();
-        sb.AppendTabs(tabs).Append("ArmorTier: ").Append(Enum.GetName(ArmorTier)).AppendLine();
+        ImGui.LabelText("Player Class", Enum.GetName(Class));
+        ImGui.LabelText("Armor Tier", Enum.GetName(ArmorTier));
     }
 }

@@ -1,25 +1,20 @@
-using DiegoG.MonoGame.Extended;
+using System;
+using System.Diagnostics;
+using DiegoG.DungeonRogue.GameComponents.Base;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
-using MonoGame.Extended.Input;
 
-namespace DiegoG.DungeonRogue.Components;
+namespace DiegoG.DungeonRogue.GameComponents.Controllers;
 
-public class InputReactor : GameComponent
+public class InputController : CharacterController
 {
-    public IPositionable? Target { get; set; } 
-    
-    public InputReactor(Game game) : base(game)
+    public override void UpdateCharacter(CharacterComponent character, GameTime gameTime)
     {
-        UpdateOrder = int.MaxValue; // By default, it should update last
-    }
-
-    public override void Update(GameTime gameTime)
-    {
+        ArgumentNullException.ThrowIfNull(character);
+        Debug.Assert(gameTime is not null);
+        
         // TODO: Make it more configurable, and add different keybindings and controller support
-
-        if (Target is not IPositionable positionable) return;
 
         Vector2 accel = default;
         
@@ -37,9 +32,6 @@ public class InputReactor : GameComponent
 
         if (accel == Vector2.Zero) return;
         
-        if (positionable is IMovable movable)
-            movable.Move(accel);
-        else
-            positionable.Position += accel;
+        character.Move(accel.NormalizedCopy());
     }
 }

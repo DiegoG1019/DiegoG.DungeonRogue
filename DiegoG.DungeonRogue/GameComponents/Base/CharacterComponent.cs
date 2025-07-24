@@ -1,16 +1,19 @@
 using System;
 using System.Text;
 using DiegoG.DungeonRogue.Data;
+using DiegoG.DungeonRogue.GameComponents.Controllers;
 using DiegoG.MonoGame.Extended;
 using GLV.Shared.Common;
+using GLV.Shared.Common.Text;
+using ImGuiNET;
 using Microsoft.Xna.Framework;
 using MonoGame.Extended;
 using MonoGame.Extended.Graphics;
 using MonoGame.Extended.Timers;
 
-namespace DiegoG.DungeonRogue.Components;
+namespace DiegoG.DungeonRogue.GameComponents.Base;
 
-public abstract class CharacterComponent : DrawableGameComponent, IMovable, ISpacePositionable, ISizable
+public abstract class CharacterComponent : DrawableGameComponent, IMovable, ISpacePositionable, ISizable, IDebugExplorable
 {
     public CharacterComponent(Game game) : base(game)
     {
@@ -21,7 +24,7 @@ public abstract class CharacterComponent : DrawableGameComponent, IMovable, ISpa
 
     public Vector2 Position { get; set; }
 
-    public float Speed { get; set; } = 1;
+    public float Speed { get; set; } = 3;
 
     public Vector2 FacingDirection
     {
@@ -62,6 +65,8 @@ public abstract class CharacterComponent : DrawableGameComponent, IMovable, ISpa
         MovedStatus = MovedStatus.StartedMoving;
     }
     
+    public CharacterController? Controller { get; set; }
+    
     protected virtual void DirectionChanged(){}
 
     protected virtual void MovedChanged(){}
@@ -75,6 +80,8 @@ public abstract class CharacterComponent : DrawableGameComponent, IMovable, ISpa
     public override void Update(GameTime gameTime)
     {
         base.Update(gameTime);
+        Controller?.UpdateCharacter(this, gameTime);
+        
         Sprite?.Update(gameTime);
         stoppedMovingTimer.Update(gameTime);
         
@@ -105,26 +112,54 @@ public abstract class CharacterComponent : DrawableGameComponent, IMovable, ISpa
         Sprite?.Draw(DungeonGame.WorldSpriteBatch, RelativePosition, 0, Size);
     }
 
-    protected internal virtual void DebugDump(StringBuilder sb, int tabs)
+    public virtual void RenderImGuiDebug()
     {
         Span<char> buffer = stackalloc char[800];
+        var sb = new ValueStringBuilder(buffer);
 
-        sb.AppendTabs(tabs).Append("Sprite: ").Append(Sprite?.TextureRegion.Name).Append(" (").Append(Sprite?.CurrentAnimation)
-            .Append(")\n");
+        sb.Append("Sprite: ");
+        sb.Append(Sprite?.TextureRegion.Name);
+        sb.Append(" (");
+        sb.Append(Sprite?.CurrentAnimation);
+        sb.Append(')');
+        ImGui.Text(sb.AsSpan());
 
-        sb.AppendTabs(tabs).AppendLine("Anim: ");
-        Sprite?.Controller.DebugDump(sb, 1);
-        sb.AppendTabs(tabs).AppendLine();
+        if (Sprite is not null)
+        {
+            if (ImGui.TreeNode(Sprite.GetHashCode().ToStringSpan(buffer), "Animation Controller"))
+            {
+                Sprite?.Controller.RenderImGuiDebug();
+                ImGui.TreePop();
+            }
+        }
 
-        sb.AppendTabs(tabs).Append("Position: ").Append(Position.ToStringSpan(buffer)).AppendLine();
-        sb.AppendTabs(tabs).Append("RelativePosition: ").Append(RelativePosition.ToStringSpan(buffer)).AppendLine();
-        sb.AppendTabs(tabs).Append("Speed: ").Append(Speed.ToStringSpan(buffer)).AppendLine();
-        sb.AppendTabs(tabs).Append("MovedStatus: ").Append(Enum.GetName(MovedStatus)).AppendLine();
-        sb.AppendTabs(tabs).Append("FacingDirection: ").Append(FacingDirection.ToStringSpan(buffer)).AppendLine();
-        sb.AppendTabs(tabs).Append("StoppedMovingDelay: ").Append(StoppedMovingDelay.ToStringSpan(buffer)).AppendLine();
-        sb.AppendTabs(tabs).Append("Size: ").Append(Size.ToStringSpan(buffer)).AppendLine();
+        var pos = Position.ToNumerics();
+        if (ImGui.InputFloat2("Position", ref pos))
+            Position = pos;
+
+        var relpos = RelativePosition.ToNumerics();
+        if (ImGui.InputFloat2("Relative Position", ref relpos))
+            RelativePosition = relpos;
+
+        var spd = Speed;
+        if (ImGui.InputFloat("Speed", ref spd))
+            Speed = spd;
         
-        sb.AppendTabs(tabs).Append("Space: ").Append(Space?.GetType().Name).AppendLine();
+        ImGui.LabelText("Moved Status", Enum.GetName(MovedStatus));
+        
+        var facdir = FacingDirection.ToNumerics();
+        if (ImGui.InputFloat2("Facing Direction", ref facdir))
+            FacingDirection = facdir;
+
+        var smds = StoppedMovingDelay.TotalSeconds;
+        if (ImGui.InputDouble("Stopped Moving Delay", ref smds))
+            StoppedMovingDelay = TimeSpan.FromSeconds(smds);
+
+        var size = ((Vector2)Size).ToNumerics();
+        if (ImGui.InputFloat2("Size", ref size))
+            Size = new(size.X, size.Y);
+        
+        ImGui.LabelText("Space", Space?.GetType().Name ?? "None assigned");
     }
     
     public ISpace? Space { get; set; }

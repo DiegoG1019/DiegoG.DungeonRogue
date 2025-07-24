@@ -5,5 +5,6 @@
     <mapping directory="$PROJECT_DIR$/../DiegoG.MonoGame" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../GLV.Shared" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../MonoGame.Extended" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../MonoGame.ImGuiNet" vcs="Git" />
   </component>
 </project>

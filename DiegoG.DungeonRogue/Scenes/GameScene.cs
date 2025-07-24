@@ -1,5 +1,8 @@
-using DiegoG.DungeonRogue.Components;
+using System;
 using DiegoG.DungeonRogue.Data;
+using DiegoG.DungeonRogue.GameComponents;
+using DiegoG.DungeonRogue.GameComponents.Controllers;
+using DiegoG.DungeonRogue.Scenes.Levels;
 using DiegoG.MonoGame.Extended;
 using Microsoft.Xna.Framework;
 using MonoGame.Extended;
@@ -10,41 +13,44 @@ public class GameScene : Scene
 {
     public GameScene(Game game) : base(game)
     {
-        inputReactor = new(game);
         WorldCamera = new(GraphicsDevice);
-        SceneComponents.Add(inputReactor);
+        Player = new(Game, PlayerClass.Warrior)
+        {
+            Controller = new InputController(),
+            UpdateOrder = int.MinValue
+        };
+
+        CurrentLevel = new TestLevel(this)
+        {
+            DrawOrder = int.MinValue
+        };
     }
 
     public OrthographicCamera WorldCamera { get; }
-    
+
+    public LevelScene? CurrentLevel
+    {
+        get;
+        set => ExchangeComponentProperty(value, ref field);
+    }
+
     public PlayerCharacterComponent? Player
     {
         get;
-        set
-        {
-            if (value == field) return;
-            
-            if (field is not null) SceneComponents.Remove(field);
-            SceneComponents.Add(value);
-            
-            inputReactor.Target = value;
-            field = value;
-        }
+        set => ExchangeComponentProperty(value, ref field);
     }
-
-    private readonly InputReactor inputReactor;
 
     public override void Initialize()
     {
         base.Initialize();
-        Player = new(Game, PlayerClass.Warrior);
     }
 
     public override void Update(GameTime gameTime)
     {
         base.Update(gameTime);
-        
-        WorldCamera.ZoomIn(DungeonGame.MouseState.GetMouseCameraZoomDelta());
+
+        if (DungeonGame.KeyboardState.IsAltDown())
+            WorldCamera.ZoomIn(DungeonGame.MouseState.GetMouseCameraZoomDelta());
     }
 
     public override void Draw(GameTime gameTime)

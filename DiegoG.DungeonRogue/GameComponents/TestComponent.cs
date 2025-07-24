@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using MonoGame.Extended.Tweening;
 
-namespace DiegoG.DungeonRogue.Components;
+namespace DiegoG.DungeonRogue.GameComponents;
 
 public class TestComponent(Game game) : DrawableGameComponent(game)
 {

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Security.Cryptography;
-using DiegoG.DungeonRogue.Components;
+using System.Text;
+using DiegoG.DungeonRogue.GameComponents;
 using DiegoG.DungeonRogue.Scenes;
 using DiegoG.DungeonRogue.Services;
 using DiegoG.MonoGame.Extended;
+using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -59,7 +61,7 @@ public partial class DungeonGame : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
         Components.ComponentAdded += (sender, args) => args.GameComponent.Initialize();
-
+        
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
             .WriteTo.Console(LogEventLevel.Verbose)
@@ -80,6 +82,11 @@ public partial class DungeonGame : Game
             UIMenuScene = uiScene,
             GameScene = mainScene
         }));
+        
+        Services.AddPool<StringBuilder>(() => new StringBuilder(200));
+
+        Window.AllowUserResizing = true;
+        Window.Title = "Dungeon Game - By Diego García";
 
         //mainScene.SceneComponents.Add(new TestComponent(this));
     }
@@ -93,7 +100,7 @@ public partial class DungeonGame : Game
         {
             SamplerState = SamplerState.PointClamp
         };
-        
+
         imGuiRenderer = new(this);
         imGuiRenderer.RebuildFontAtlas();
     }
