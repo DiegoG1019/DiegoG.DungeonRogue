@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using DiegoG.MonoGame.Extended;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -26,8 +27,8 @@ public class TestLevel(GameScene gameScene) : LevelScene(gameScene)
         base.Draw(gameTime);
 
         if (atlas is null) return;
-        
-        foreach(var cell in MapGrid.GetCells())
+
+        foreach (var cell in MapGrid.GetCells()) 
             DungeonGame.WorldSpriteBatch.Draw(atlas[0], cell, Color.White);
     }
 }

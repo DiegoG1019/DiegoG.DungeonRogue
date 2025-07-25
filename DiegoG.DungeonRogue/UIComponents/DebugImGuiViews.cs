@@ -51,24 +51,6 @@ public class DebugImGuiViews(Game game) : DrawableGameComponent(game)
         if (ShowMetricsWindow)
             ImGui.ShowMetricsWindow();
 
-        var player = gameState.Local.GameScene.Player;
-        if (player is null) 
-            ImGui.Text("No player currently loaded");
-        else
-        {
-            if (ImGui.CollapsingHeader("Player Info"))
-                player.RenderImGuiDebug();
-        }
-        
-        var level = gameState.Local.GameScene.CurrentLevel;
-        if (level is null) 
-            ImGui.Text("No level is currently loaded");
-        else
-        {
-            if (ImGui.CollapsingHeader("Level Info"))
-                RenderCurrentLevelBlock(level);
-        }
-
         if (ImGui.CollapsingHeader("All Components"))
             RenderComponentBlock();
 
@@ -156,7 +138,7 @@ public class DebugImGuiViews(Game game) : DrawableGameComponent(game)
         RenderImGuiComponent(level, buffer, smallbuffer, ref sb, true);
     }
 
-    private void RenderComponentBlock()
+    internal static void RenderComponentBlock()
     {
         Span<char> buffer = stackalloc char[800];
         Span<char> smallbuffer = stackalloc char[16];
@@ -166,25 +148,13 @@ public class DebugImGuiViews(Game game) : DrawableGameComponent(game)
             RenderImGuiComponent(comp, buffer, smallbuffer, ref sb);
     }
 
-    private void RenderImGuiComponent(IGameComponent comp, Span<char> buffer, Span<char> smallbuffer, ref ValueStringBuilder sb, bool skipLevelCheck = false)
+    internal static void RenderImGuiComponent(IGameComponent comp, Span<char> buffer, Span<char> smallbuffer, ref ValueStringBuilder sb, bool skipLevelCheck = false)
     {
-        var gameState = Game.Services.GetService<GameState>();
+        var gameState = DungeonGame.Instance.Services.GetService<GameState>();
         
         if (comp.GetType().IsAssignableTo(typeof(DebugImGuiViews)))
         {
             ImGui.TextColored(Color.Red.ToVector4().ToNumerics(), "Debug View Component");
-            return;
-        }
-
-        if (comp == gameState.Local.GameScene.Player)
-        {
-            ImGui.TextColored(Color.Yellow.ToVector4().ToNumerics(), "Player Character");
-            return;
-        }
-
-        if (skipLevelCheck == false && comp == gameState.Local.GameScene.CurrentLevel)
-        {
-            ImGui.TextColored(Color.Green.ToVector4().ToNumerics(), "Current Level");
             return;
         }
 
@@ -201,7 +171,14 @@ public class DebugImGuiViews(Game game) : DrawableGameComponent(game)
             {
                 ImGui.LabelText("Updating", sc.Enabled ? "Enabled" : "Disabled");
                 ImGui.LabelText("Drawing", sc.Visible ? "Visible" : "Invisible");
-                            
+
+                if (ImGui.TreeNode("More info"))
+                {
+                    if (sc is IDebugExplorable dsc) 
+                        dsc.RenderImGuiDebug();
+                    ImGui.TreePop();
+                }
+                
                 sb.Clear();
                 sb.Append(sc.SceneComponents.Count.ToStringSpan(smallbuffer));
                 sb.Append(" Child Components");

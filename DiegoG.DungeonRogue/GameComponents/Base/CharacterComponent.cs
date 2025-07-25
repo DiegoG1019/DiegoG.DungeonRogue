@@ -24,7 +24,7 @@ public abstract class CharacterComponent : DrawableGameComponent, IMovable, ISpa
 
     public Vector2 Position { get; set; }
 
-    public float Speed { get; set; } = 3;
+    public float Speed { get; set; } = .75f;
 
     public Vector2 FacingDirection
     {
@@ -164,5 +164,5 @@ public abstract class CharacterComponent : DrawableGameComponent, IMovable, ISpa
     
     public ISpace? Space { get; set; }
 
-    public SizeF Size { get; set; } = new(10, 10);
+    public SizeF Size { get; set; } = new(1, 1);
 }
