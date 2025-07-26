@@ -1,10 +1,14 @@
 using System;
+using System.Collections.Frozen;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
+using DiegoG.DungeonRogue.WorldGen.Generators;
 using GLV.Shared.Common;
 using GLV.Shared.Common.Text;
 using ImGuiNET;
+using Microsoft.Xna.Framework;
 
 namespace DiegoG.DungeonRogue.WorldGen;
 
@@ -52,7 +56,16 @@ public class DungeonInfo : IDebugExplorable
 
     public event CurrentAreaChangedEventHandler? CurrentAreaChanged;
 
-    public IDungeonGenerator GetGeneratorFor(DungeonFloorId id) => DrunkardsWalkGenerator.Instance;
+    private static readonly FrozenDictionary<TileId, Color> GlobalColorKey = new Dictionary<TileId, Color>()
+    {
+        { TileId.Empty, Color.Black },
+        { TileId.Normal, Color.Azure },
+        { TileId.Entry, Color.Red },
+        { TileId.Exit, Color.Blue }
+    }.ToFrozenDictionary();
+    
+    public IDungeonGenerator GetGeneratorFor(DungeonFloorId id) => DrunkardsWalkGenerator.Default;
+    public FrozenDictionary<TileId, Color> GetColorKeyFor(DungeonFloorId id) => GlobalColorKey;
 
     public void RenderImGuiDebug()
     {

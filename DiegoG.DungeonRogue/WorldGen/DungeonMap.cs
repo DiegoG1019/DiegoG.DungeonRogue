@@ -136,10 +136,22 @@ public sealed class DungeonMap : IDebugExplorable
                     
                     sb.Append("] Gen: ");
                     sb.Append(Enum.GetName(na.GenTaskStatus));
-                    if (!ImGui.TreeNode(sb.AsSpan())) continue;
-                    na.RenderImGuiDebug();
-                    ImGui.TreePop();
+                    if (ImGui.TreeNode(sb.AsSpan()))
+                    {
+                        na.RenderImGuiDebug();
+                        ImGui.TreePop();
+                    }
                 }
+                
+                sb.Clear();
+                sb.Append("Load Area F[");
+                sb.Append(i.ToStringSpan(bf));
+                sb.Append("][");
+                sb.Append(aidx.ToStringSpan(bf));
+                sb.Append(']');
+                ImGui.SameLine();
+                if (ImGui.Button(sb.AsSpan()))
+                    DungeonInfo.CurrentFloorId = new((byte)aidx, (byte)i);
             }
                     
             ImGui.TreePop();

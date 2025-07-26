@@ -7,5 +7,5 @@ namespace DiegoG.DungeonRogue.WorldGen;
 
 public interface IDungeonGenerator
 {
-    public Task<DungeonArea> GenerateArea(DungeonArea context);
+    public Task GenerateArea(DungeonArea area);
 }

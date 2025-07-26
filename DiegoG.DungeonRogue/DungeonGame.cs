@@ -6,6 +6,7 @@ using DiegoG.DungeonRogue.GameComponents;
 using DiegoG.DungeonRogue.Scenes;
 using DiegoG.DungeonRogue.Services;
 using DiegoG.MonoGame.Extended;
+using DiegoG.MonoGame.Extended.Tasks;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -76,6 +77,7 @@ public partial class DungeonGame : Game
         var uiScene = new UIMenuScene(this);
         Components.Add(mainScene);
         Components.Add(uiScene);
+        Components.Add(new BackgroundTasksWorkerComponent(this));
 
         Services.AddService(new GameState(new LocalGameState()
         {
