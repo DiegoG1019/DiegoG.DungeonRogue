@@ -32,7 +32,7 @@ public class DungeonLevel(GameScene gameScene) : LevelScene(gameScene), IDebugEx
                 if (cell.Data.TileId == TileId.Normal)
                     DungeonGame.WorldSpriteBatch.Draw(atlas[0], cell.GetPosition(), Color.White);
                 else if (cell.Data.TileId == TileId.Entry)
-                    DungeonGame.WorldSpriteBatch.Draw(atlas[13], cell.GetPosition(), Color.White);
+                    DungeonGame.WorldSpriteBatch.Draw(atlas[16], cell.GetPosition(), Color.White);
         }
     }
 

@@ -1,6 +1,8 @@
 using System;
 using System.Buffers;
 using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -34,7 +36,7 @@ public class DungeonArea : IDebugExplorable, IProgress<float>
         Area = new BoundedSquareGrid(new(CellSize, CellSize), _a.Width, _a.Height);
         AreaAttributes = attributes ?? 0;
         TileData = new(Area);
-        AreaGraph = new Texture2D(DungeonGame.Instance.GraphicsDevice, Area.XCells, Area.YCells, false, SurfaceFormat.Color);
+        AreaGraph = new Texture2D(DungeonGame.Instance.GraphicsDevice, Area.XCells, Area.YCells);
         areaGraphPtr = DungeonGame.ImGuiRenderer.BindTexture(AreaGraph);
         AreaGraph.Disposing += (sender, args) => DungeonGame.ImGuiRenderer.UnbindTexture(areaGraphPtr);
     }
@@ -51,6 +53,7 @@ public class DungeonArea : IDebugExplorable, IProgress<float>
     public DungeonFloorId Id { get; }
     public int Seed { get; }
     public Random Random { get; }
+    public ImmutableArray<DungeonRoom> Rooms { get; private set; }
     
     public TimeSpan GenerationTime { get; private set; }
     
@@ -101,15 +104,10 @@ public class DungeonArea : IDebugExplorable, IProgress<float>
         ImGui.LabelText("Activity", ActivityMessage ?? "Idle");
         ImGui.LabelText("Generation Completed", GenerationCompleted ? "Generated" : "Not yet generated");
         RenderImGuiSeed();
-        if (ImGui.TreeNode("Area Graph"))
-        {
-            if (GenerationCompleted)
-                ImGui.Image(areaGraphPtr, new(AreaGraph.Width, AreaGraph.Height));
-            else
-                ImGui.Text("Not generated yet...");
-            
-            ImGui.TreePop();
-        }
+        if (GenerationCompleted)
+            ImGui.Image(areaGraphPtr, new(AreaGraph.Width, AreaGraph.Height));
+        else
+            ImGui.Text("Not generated yet...");
     }
 
     private void RenderImGuiSeed()
@@ -149,17 +147,20 @@ public class DungeonArea : IDebugExplorable, IProgress<float>
 
     void IProgress<float>.Report(float value) => ReportProgress(value);
 
-    protected virtual ValueTask FinalizeGeneration()
+    protected virtual ValueTask FinalizeGeneration(DungeonAreaGenerationResults results)
     {
         var len = AreaGraph.Height * AreaGraph.Width;
         uint[] colorData = ArrayPool<uint>.Shared.Rent(len);
         try
         {
             int ci = 0;
-            var ck = DungeonInfo.GetColorKeyFor(Id);
+            var ck = DungeonInfo.GetColorKeyFor(Id, out var roomTint);
             foreach (var cell in TileData.GetCells())
             {
-                colorData[ci++] = (ck[cell.Data.TileId] with { A = 100 }).PackedValue;
+                var co = ck[cell.Data.TileId];
+                if (cell.Data.TileFlags.HasFlag(TileFlags.RoomTile))
+                    co *= roomTint;
+                colorData[ci++] = (co with { A = 100 }).PackedValue;
             }
             AreaGraph.SetData(colorData, 0, len);
         }
@@ -167,6 +168,8 @@ public class DungeonArea : IDebugExplorable, IProgress<float>
         {
             ArrayPool<uint>.Shared.Return(colorData);
         }
+
+        Rooms = results.Rooms.ToImmutableArray();
         
         return ValueTask.CompletedTask;
     }
@@ -183,8 +186,8 @@ public class DungeonArea : IDebugExplorable, IProgress<float>
             {
                 await Task.Yield();
                 var st = DateTime.Now;
-                await gen.GenerateArea(this);
-                await FinalizeGeneration();
+                var result = await gen.GenerateArea(this);
+                await FinalizeGeneration(result);
                 GenerationTime = DateTime.Now - st;
                 lock (Random)
                 {

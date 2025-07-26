@@ -26,7 +26,7 @@ public enum TileId : byte
 public enum TileFlags : byte
 {
     None = 0,
-    A = 1,
+    RoomTile = 1,
     B = 1 << 1,
     C = 1 << 2,
     

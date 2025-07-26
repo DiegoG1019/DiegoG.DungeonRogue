@@ -65,7 +65,12 @@ public class DungeonInfo : IDebugExplorable
     }.ToFrozenDictionary();
     
     public IDungeonGenerator GetGeneratorFor(DungeonFloorId id) => DrunkardsWalkGenerator.Default;
-    public FrozenDictionary<TileId, Color> GetColorKeyFor(DungeonFloorId id) => GlobalColorKey;
+
+    public FrozenDictionary<TileId, Color> GetColorKeyFor(DungeonFloorId id, out Color roomTint)
+    {
+        roomTint = Color.Beige;
+        return GlobalColorKey;
+    }
 
     public void RenderImGuiDebug()
     {
