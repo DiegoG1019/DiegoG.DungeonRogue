@@ -11,6 +11,6 @@ public class GameState(
 
 public class LocalGameState
 {
-    public UIMenuScene UIMenuScene { get; init; }
-    public GameScene GameScene { get; init; }
+    public required UIMenuScene UIMenuScene { get; init; }
+    public required GameScene GameScene { get; init; }
 }

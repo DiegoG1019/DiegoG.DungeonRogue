@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using GLV.Shared.Common;
 using GLV.Shared.Common.Text;
 using ImGuiNET;
 
-namespace DiegoG.DungeonRogue.WorldGen;
+namespace DiegoG.DungeonRogue.World;
 
 public sealed class DungeonMap : IDebugExplorable
 {
@@ -139,6 +138,21 @@ public sealed class DungeonMap : IDebugExplorable
                     if (ImGui.TreeNode(sb.AsSpan()))
                     {
                         na.RenderImGuiDebug();
+                        
+                        sb.Clear();
+                        sb.Append("Renderer: ");
+                        sb.Append(na.Renderer?.GetType().Name ?? "null");
+                        if (na.Renderer is not IDebugExplorable deren)
+                            ImGui.BulletText(sb.AsSpan());
+                        else
+                        {
+                            if (ImGui.TreeNode(sb.AsSpan()))
+                            {
+                                deren.RenderImGuiDebug();
+                                ImGui.TreePop();
+                            }
+                        }
+                        
                         ImGui.TreePop();
                     }
                 }
@@ -152,6 +166,7 @@ public sealed class DungeonMap : IDebugExplorable
                 ImGui.SameLine();
                 if (ImGui.Button(sb.AsSpan()))
                     DungeonInfo.CurrentFloorId = new((byte)aidx, (byte)i);
+                
             }
                     
             ImGui.TreePop();

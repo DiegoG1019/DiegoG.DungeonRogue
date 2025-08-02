@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace DiegoG.DungeonRogue.WorldGen;
+namespace DiegoG.DungeonRogue.World;
 
 public readonly record struct DungeonFloorId(byte AreaIndex, byte FloorIndex);
 

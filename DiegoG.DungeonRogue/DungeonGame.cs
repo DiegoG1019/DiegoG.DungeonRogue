@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using DiegoG.DungeonRogue.Data;
 using DiegoG.DungeonRogue.GameComponents;
 using DiegoG.DungeonRogue.Scenes;
 using DiegoG.DungeonRogue.Services;
@@ -55,6 +57,10 @@ public partial class DungeonGame : Game
     
     public static KeyboardStateExtended KeyboardState => Instance.keyboard;
     private KeyboardStateExtended keyboard;
+
+    public static CLArgs ParsedCommandLine => Instance.clargs;
+    private readonly CLArgs clargs;
+    private readonly CallDeferrer deferrer;
     
     private DungeonGame()
     {
@@ -67,6 +73,9 @@ public partial class DungeonGame : Game
             .MinimumLevel.Verbose()
             .WriteTo.Console(LogEventLevel.Verbose)
             .CreateLogger();
+
+        clargs = CommandLine.Parser.Default.ParseArguments<CLArgs>(Environment.GetCommandLineArgs()).Value;
+        deferrer = Services.AddCallDeferrerService(this);
     }
 
     protected override void Initialize()
@@ -109,7 +118,9 @@ public partial class DungeonGame : Game
 
     protected override void Update(GameTime gameTime)
     {
+        deferrer.ExecuteUpdateStartDeferredCalls(gameTime);
         base.Update(gameTime);
+        deferrer.ExecuteUpdateEndDeferredCalls(gameTime);
         mouse = new MouseStateMemory(mouse, Mouse.GetState());
         KeyboardExtended.Update();
         keyboard = KeyboardExtended.GetState();
@@ -118,6 +129,7 @@ public partial class DungeonGame : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(clearColor);
+        deferrer.ExecuteDrawStartDeferredCalls(gameTime);
 
         backgroundSpriteBatch.BeginWithState();
         worldSpriteBatch.BeginWithState();
@@ -126,7 +138,9 @@ public partial class DungeonGame : Game
         imGuiRenderer.BeginLayout(gameTime);
         
         base.Draw(gameTime);
-
+        
+        deferrer.ExecuteDrawEndDeferredCalls(gameTime);
+        
         backgroundSpriteBatch.End();
         worldSpriteBatch.End();
         hudSpriteBatch.End();

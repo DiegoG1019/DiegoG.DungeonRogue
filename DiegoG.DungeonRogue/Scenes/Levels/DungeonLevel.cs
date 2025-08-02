@@ -1,39 +1,64 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using DiegoG.DungeonRogue.WorldGen;
+using System.Security.Cryptography;
+using DiegoG.DungeonRogue.World;
 using GLV.Shared.Common.Text;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.Graphics;
+using Serilog;
 
 namespace DiegoG.DungeonRogue.Scenes.Levels;
 
 public class DungeonLevel(GameScene gameScene) : LevelScene(gameScene), IDebugExplorable
 {
-    public DungeonInfo? CurrentDungeon { get; set; } = new();
-    private Texture2DAtlas? atlas;
+    public DungeonInfo? CurrentDungeon
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            TryDebugGenAreas();
+        }
+    } 
+    
+    public Vector2 MiniMapPosition { get; set; } = new Vector2(16, 16);
+
+    public float MiniMapSizePercentage { get; set; } = 1.5f;
 
     protected override void LoadContent()
     {
-        base.LoadContent();
+        CurrentDungeon = new();
         
-        var tex = Game.Content.Load<Texture2D>("Environment/tiles_sewers");
-        atlas = Texture2DAtlas.Create($"Atlas/Environment/tiles_sewers", tex, 16, 16);
+        base.LoadContent();
     }
 
     public override void Draw(GameTime gameTime)
     {
         base.Draw(gameTime);
-        Debug.Assert(atlas is not null);
-        if (CurrentDungeon?.CurrentArea is DungeonArea { GenerationCompleted: true } da)
-        {
+        
+        if (CurrentDungeon?.CurrentArea is not DungeonArea { GenerationCompleted: true } da) return;
+        da.Renderer?.Draw(gameTime);
+        
+        /*
             foreach (var cell in da.TileData.GetCells())
                 if (cell.Data.TileId == TileId.Normal)
                     DungeonGame.WorldSpriteBatch.Draw(atlas[0], cell.GetPosition(), Color.White);
                 else if (cell.Data.TileId == TileId.Entry)
                     DungeonGame.WorldSpriteBatch.Draw(atlas[16], cell.GetPosition(), Color.White);
-        }
+            */
+
+        // TODO: this can be cached, and changed upon the area changed event firing
+        var miniMapRect = new Rectangle(
+            (int)MiniMapPosition.X,
+            (int)MiniMapPosition.Y,
+            (int)(da.AreaGraph.Bounds.Width * MiniMapSizePercentage),
+            (int)(da.AreaGraph.Bounds.Height * MiniMapSizePercentage)  
+        );    
+        DungeonGame.HUDSpriteBatch.Draw(da.AreaGraph, miniMapRect, null, Color.White with { A = 255 });
     }
 
     public void RenderImGuiDebug()
@@ -46,5 +71,38 @@ public class DungeonLevel(GameScene gameScene) : LevelScene(gameScene), IDebugEx
             d.RenderImGuiDebug();
             ImGui.TreePop();
         }
+    }
+
+    private void TryDebugGenAreas()
+    {
+        #if DEBUG
+
+        if (DungeonGame.ParsedCommandLine.AutoGenTestLevels <= 0) return;
+        var levelsToGen = DungeonGame.ParsedCommandLine.AutoGenTestLevels;
+
+        List<int> mapdesc = [];
+        {
+            var levels = levelsToGen;
+            while (levels > byte.MaxValue)
+            {
+                mapdesc.Add(byte.MaxValue);
+                levels -= byte.MaxValue;
+            }
+            
+            mapdesc.Add(levels);
+        }
+
+        var cd = new DungeonInfo(mapdescription: mapdesc);
+        Log.Warning("Attempting to generate {levelsToGen} areas on dungeon {dungeonHash} ({dungeonSeed}) levels for testing purposes", levelsToGen, cd.GetHashCode(), cd.Seed);
+        
+        for (int i = 0; i < levelsToGen; i++)
+        {
+            byte areaIndex = (byte)(i % (byte.MaxValue + 1));
+            byte floorIndex = (byte)(i / byte.MaxValue);
+            cd.Map.GetOrGenerate(new DungeonFloorId(areaIndex, floorIndex));
+        }
+        
+        Log.Warning("Finished generating {levelsToGen} on dungeon {dungeonHash} ({dungeonSeed}) levels for testing purposes", levelsToGen, cd.GetHashCode(), cd.Seed);
+        #endif
     }
 }

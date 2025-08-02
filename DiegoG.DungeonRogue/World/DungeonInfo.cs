@@ -4,31 +4,32 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
-using DiegoG.DungeonRogue.WorldGen.Generators;
+using DiegoG.DungeonRogue.World.Rendering;
+using DiegoG.DungeonRogue.World.WorldGeneration;
+using DiegoG.DungeonRogue.World.WorldGeneration.Generators;
+using DiegoG.DungeonRogue.World.WorldGeneration.Generators.LayoutGenerators;
+using DiegoG.DungeonRogue.World.WorldGeneration.Generators.TileGenerators;
 using GLV.Shared.Common;
-using GLV.Shared.Common.Text;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.Graphics;
 
-namespace DiegoG.DungeonRogue.WorldGen;
+namespace DiegoG.DungeonRogue.World;
 
 public class DungeonInfo : IDebugExplorable
 {
     public delegate void CurrentAreaChangedEventHandler(DungeonInfo dungeon, DungeonArea? newArea);
 
-    public DungeonInfo(int? seed = null)
+    public DungeonInfo(int? seed = null, ICollection<int>? mapdescription = null)
     {
         var _s = seed ?? RandomNumberGenerator.GetInt32(int.MinValue, int.MaxValue);
         Seed = _s;
         Random = new(_s);
-        Map = new(this, [5, 5, 5, 5]);
+        Map = new(this, mapdescription ?? [5, 5, 5, 5]);
         da_field = Map.GetOrGenerate(default);
     }
     
-    //TODO: Preallocate all the room seeds, so that generation is done regardless of player entry order.
-    //TODO: I want there to be several routes a player can take, and to be able to mix between them. Maybe add dungeon size?
-    //public ImmutableArray<int> RoomSeeds { get; }
-
     public int Seed { get; }
     public DungeonMap Map { get; }
     public Random Random { get; }
@@ -58,18 +59,24 @@ public class DungeonInfo : IDebugExplorable
 
     private static readonly FrozenDictionary<TileId, Color> GlobalColorKey = new Dictionary<TileId, Color>()
     {
-        { TileId.Empty, Color.Black },
-        { TileId.Normal, Color.Azure },
-        { TileId.Entry, Color.Red },
+        { TileId.Empty, Color.Transparent },
+        { TileId.Normal, Color.Red },
+        { TileId.Entry, Color.Green },
         { TileId.Exit, Color.Blue }
     }.ToFrozenDictionary();
     
-    public IDungeonGenerator GetGeneratorFor(DungeonFloorId id) => DrunkardsWalkGenerator.Default;
+    public IDungeonLayoutGenerator GetLayoutGeneratorFor(DungeonFloorId id) => DrunkardsWalkLayoutGenerator.Default;
 
     public FrozenDictionary<TileId, Color> GetColorKeyFor(DungeonFloorId id, out Color roomTint)
     {
-        roomTint = Color.Beige;
+        roomTint = Color.Yellow;
         return GlobalColorKey;
+    }
+
+    public Texture2DAtlas GetAtlasFor(DungeonFloorId id)
+    {
+        var tex = DungeonGame.Instance.Content.Load<Texture2D>("Environment/tiles_sewers");
+        return Texture2DAtlas.Create($"Atlas/Environment/tiles_sewers", tex, 16, 16);
     }
 
     public void RenderImGuiDebug()
@@ -80,4 +87,8 @@ public class DungeonInfo : IDebugExplorable
         if (ImGui.CollapsingHeader("Dungeon Map"))
             Map.RenderImGuiDebug();
     }
+
+    public IDungeonTileGenerator GetTileGeneratorFor(DungeonFloorId id) => new TestTileGenerator();
+
+    public IDungeonRenderer GetRendererFor(DungeonFloorId id) => new PrerenderToTextureDungeonRenderer();
 }

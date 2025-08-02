@@ -9,8 +9,8 @@ namespace DiegoG.DungeonRogue.GameComponents;
 public class TestComponent(Game game) : DrawableGameComponent(game)
 {
     public Vector2 Position { get; set; }
-    private Texture2D tex;
-    private Tweener twink;
+    private Texture2D? tex;
+    private Tweener? twink;
 
     protected override void LoadContent()
     {
@@ -22,6 +22,7 @@ public class TestComponent(Game game) : DrawableGameComponent(game)
 
     public override void Update(GameTime gameTime)
     {
+        Debug.Assert(twink is not null);
         base.Update(gameTime);
         twink.Update(gameTime.GetElapsedSeconds());
     }

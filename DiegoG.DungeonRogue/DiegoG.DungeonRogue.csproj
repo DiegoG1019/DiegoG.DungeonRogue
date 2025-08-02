@@ -8,6 +8,7 @@
         <LangVersion>preview</LangVersion>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="CommandLineParser" Version="2.9.1" />
         <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*">
             <PrivateAssets>All</PrivateAssets>
         </PackageReference>
@@ -29,6 +30,10 @@
       <EmbeddedResource Include="Icon.ico">
         <LogicalName>Icon.ico</LogicalName>
       </EmbeddedResource>
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="Content\Content.mgcb" />
+      <MonoGameContentReference Include="Content\Content.mgcb" />
     </ItemGroup>
     <Target Name="RestoreDotnetTools" BeforeTargets="CollectPackageReferences">
         <Message Text="Restoring dotnet tools (this might take a while depending on your internet speed and should only happen upon building your project for the first time, or after upgrading MonoGame, or clearing your nuget cache)" Importance="High"/>
