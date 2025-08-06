@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using DiegoG.DungeonRogue.Data;
-using DiegoG.DungeonRogue.Utilities;
+using DiegoG.MonoGame.Extended;
 using Microsoft.Xna.Framework;
 
 namespace DiegoG.DungeonRogue.World.WorldGeneration.Generators.LayoutGenerators;

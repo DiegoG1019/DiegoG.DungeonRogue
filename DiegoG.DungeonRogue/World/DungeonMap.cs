@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using DiegoG.MonoGame.Extended;
 using GLV.Shared.Common;
 using GLV.Shared.Common.Text;
 using ImGuiNET;

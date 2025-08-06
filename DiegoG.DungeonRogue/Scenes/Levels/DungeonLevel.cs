@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using DiegoG.DungeonRogue.World;
+using DiegoG.MonoGame.Extended;
 using GLV.Shared.Common.Text;
 using ImGuiNET;
 using Microsoft.Xna.Framework;

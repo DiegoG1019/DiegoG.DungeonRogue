@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -61,13 +63,19 @@ public partial class DungeonGame : Game
     public static CLArgs ParsedCommandLine => Instance.clargs;
     private readonly CLArgs clargs;
     private readonly CallDeferrer deferrer;
+
+    private bool initialized;
     
     private DungeonGame()
     {
         graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
-        Components.ComponentAdded += (sender, args) => args.GameComponent.Initialize();
+        Components.ComponentAdded += (sender, args) =>
+        {
+            if (initialized)
+                args.GameComponent.Initialize();
+        };
         
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
@@ -100,6 +108,21 @@ public partial class DungeonGame : Game
         Window.Title = "Dungeon Game - By Diego García";
 
         //mainScene.SceneComponents.Add(new TestComponent(this));
+
+        var count = Components.Count;
+        var comparray = ArrayPool<IGameComponent>.Shared.Rent(count);
+        try
+        {
+            Components.CopyTo(comparray, 0);
+            Debug.Assert(count is 0 || count < comparray.Length);
+            initialized = true;
+            for (int i = 0; i < count; i++)
+                comparray[i].Initialize();
+        }
+        finally
+        {
+            ArrayPool<IGameComponent>.Shared.Return(comparray);
+        }
     }
 
     protected override void LoadContent()

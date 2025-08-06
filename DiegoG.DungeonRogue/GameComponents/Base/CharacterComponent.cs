@@ -148,7 +148,7 @@ public abstract class CharacterComponent : DrawableGameComponent, IMovable, ISpa
         ImGui.LabelText("Moved Status", Enum.GetName(MovedStatus));
         
         var facdir = FacingDirection.ToNumerics();
-        if (ImGui.InputFloat2("Facing Direction", ref facdir))
+        if (ImGui.InputFloat2("Facing CardinalDirection", ref facdir))
             FacingDirection = facdir;
 
         var smds = StoppedMovingDelay.TotalSeconds;

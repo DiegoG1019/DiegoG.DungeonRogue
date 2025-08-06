@@ -1,3 +1,3 @@
 #! /bin/bash
-
-dotnet run mgcb ./Content/Content.mgcb
+mgcb ./Content/Content.mgcb
+read

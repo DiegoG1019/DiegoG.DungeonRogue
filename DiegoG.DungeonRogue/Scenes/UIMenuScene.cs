@@ -1,8 +1,8 @@
 using System;
 using System.Text;
 using DiegoG.DungeonRogue.Services;
-using DiegoG.DungeonRogue.UIComponents;
 using DiegoG.MonoGame.Extended;
+using DiegoG.MonoGame.Extended.UIComponents;
 using GLV.Shared.Common;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
