@@ -5,5 +5,5 @@ namespace DiegoG.DungeonRogue.GameComponents.Controllers;
 
 public abstract class CharacterController
 {
-    public abstract void UpdateCharacter(CharacterComponent character, GameTime gameTime);
+    public abstract void UpdateCharacter(CharacterComponent2D character, GameTime gameTime);
 }

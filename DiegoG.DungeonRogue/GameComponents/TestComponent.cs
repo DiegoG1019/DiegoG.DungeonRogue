@@ -9,12 +9,12 @@ namespace DiegoG.DungeonRogue.GameComponents;
 
 public class TestComponent(Game game) : DrawableGameComponent(game)
 {
-    public Vector2 Position { get; set; }
-    private Texture2D? tex;
     private Tweener? twink;
+    private Texture2D? tex;
     private Model? teapot;
     private Effect? shader;
     private GameState? State;
+    public Vector2 Position { get; set; }
 
     protected override void LoadContent()
     {
@@ -40,18 +40,14 @@ public class TestComponent(Game game) : DrawableGameComponent(game)
         //Debug.Assert(shader is not null);
         Debug.Assert(State is not null);
 
-        var view = State.Local.GameScene.WorldCamera3D.View;
-        var proj = State.Local.GameScene.WorldCamera3D.Projection;
-        var world = State.Local.GameScene.WorldCamera3D.World;
+        var pos = new Vector3(0, 0, -50f);
+        var cam = State.Local.GameScene.WorldCamera3D;
+        //cam.LookAt(pos);
+        var view = cam.View;
+        var proj = cam.Projection;
+        var world = cam.World;
         
-        // /* From https://gamefromscratch.com/monogame-tutorial-beginning-3d-programming/
-        //Setup Camera
-        var camTarget = new Vector3(0f, 0f, 0f);
-        var camPosition = new Vector3(53f, 15, -53);
-        //world = Matrix.CreateWorld(camTarget, Vector3.
-            //Forward, Vector3.Up);
-        
-        // */
+        var trans = Matrix.CreateTranslation(pos) * world;
         
         //DungeonGame.WorldSpriteBatch.Draw(tex, Position, Color.White);
         foreach (var mesh in teapot.Meshes)
@@ -62,9 +58,9 @@ public class TestComponent(Game game) : DrawableGameComponent(game)
                 if (fx is BasicEffect bfx)
                 {
                     bfx.EnableDefaultLighting();
-                    bfx.AmbientLightColor = new Vector3(1, 0.5f, 1);
+                    bfx.AmbientLightColor = new Vector3(1, 0.5f, .5f);
                     bfx.View = view;
-                    bfx.World = world;
+                    bfx.World = trans;
                     bfx.Projection = proj;
                 }
             }

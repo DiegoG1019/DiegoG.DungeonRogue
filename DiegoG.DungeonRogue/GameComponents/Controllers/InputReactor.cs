@@ -9,7 +9,7 @@ namespace DiegoG.DungeonRogue.GameComponents.Controllers;
 
 public class InputController : CharacterController
 {
-    public override void UpdateCharacter(CharacterComponent character, GameTime gameTime)
+    public override void UpdateCharacter(CharacterComponent2D character, GameTime gameTime)
     {
         ArgumentNullException.ThrowIfNull(character);
         Debug.Assert(gameTime is not null);

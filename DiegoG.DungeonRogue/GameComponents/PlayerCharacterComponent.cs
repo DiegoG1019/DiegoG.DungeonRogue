@@ -12,7 +12,7 @@ using Serilog;
 
 namespace DiegoG.DungeonRogue.GameComponents;
 
-public class PlayerCharacterComponent : CharacterComponent
+public class PlayerCharacterComponent : CharacterComponent2D
 {
     public PlayerCharacterComponent(Game game, PlayerClass playerClass) : base(game)
     {

@@ -13,9 +13,9 @@ using MonoGame.Extended.Timers;
 
 namespace DiegoG.DungeonRogue.GameComponents.Base;
 
-public abstract class CharacterComponent : DrawableGameComponent, IMovable, ISpacePositionable, ISizable, IDebugExplorable
+public abstract class CharacterComponent2D : DrawableGameComponent, IMovable, ISpacePositionable, ISizable, IDebugExplorable
 {
-    public CharacterComponent(Game game) : base(game)
+    public CharacterComponent2D(Game game) : base(game)
     {
         stoppedMovingTimer = new(StoppedMovingDelay);
     }
