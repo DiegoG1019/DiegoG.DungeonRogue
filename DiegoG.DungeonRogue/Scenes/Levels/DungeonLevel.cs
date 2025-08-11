@@ -32,8 +32,7 @@ public class DungeonLevel(GameScene gameScene) : LevelScene(gameScene), IDebugEx
 
     protected override void LoadContent()
     {
-        CurrentDungeon = new();
-        
+        CurrentDungeon = new(Game);
         base.LoadContent();
     }
 
@@ -93,7 +92,7 @@ public class DungeonLevel(GameScene gameScene) : LevelScene(gameScene), IDebugEx
             mapdesc.Add(levels);
         }
 
-        var cd = new DungeonInfo(mapdescription: mapdesc);
+        var cd = new DungeonInfo(Game, mapdescription: mapdesc);
         Log.Warning("Attempting to generate {levelsToGen} areas on dungeon {dungeonHash} ({dungeonSeed}) levels for testing purposes", levelsToGen, cd.GetHashCode(), cd.Seed);
         
         for (int i = 0; i < levelsToGen; i++)

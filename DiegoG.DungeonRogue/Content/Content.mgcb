@@ -362,6 +362,13 @@
 /processorParam:TextureFormat=Color
 /build:Environment/water4.png
 
+#begin Fonts/Consolas.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/Consolas.spritefont
+
 #begin Models/Testing/utah_teapot.fbx
 /importer:FbxImporter
 /processor:ModelProcessor

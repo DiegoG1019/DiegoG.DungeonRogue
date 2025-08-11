@@ -32,6 +32,7 @@ public class DrunkardsWalkLayoutGenerator : IDungeonLayoutGenerator
         double exitSetChance = 0;
         double exitSetChanceIncrement = 100.0 / cellsToTry + 10;
 
+        context.ActivityMessage = "Walking a path to generate a map";
         for (int i = 0; i < cellsToTry; i++)
         {
             if (context.Random.NextSingle() < turnChance)

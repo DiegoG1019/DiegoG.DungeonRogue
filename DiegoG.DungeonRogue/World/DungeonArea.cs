@@ -54,6 +54,7 @@ public partial class DungeonArea : IDebugExplorable, IProgress<float>
         ImGui.ProgressBar(CurrentProgress, new(-1, 0), "Terrain Generation Progress");
         RenderImGuiBounds();
         ImGui.LabelText("Activity", ActivityMessage ?? "Idle");
+        ImGui.LabelText("Generation Stage", Enum.GetName(GenerationStage));
         ImGui.LabelText("Generation Completed", GenerationCompleted ? "Generated" : "Not yet generated");
         RenderImGuiSeed();
         if (GenerationCompleted)

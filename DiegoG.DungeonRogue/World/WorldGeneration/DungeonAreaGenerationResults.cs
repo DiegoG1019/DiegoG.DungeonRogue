@@ -10,6 +10,12 @@ public sealed class DungeonAreaLayoutGenerationContext(DungeonArea area)
     private readonly List<Rectangle> roomsRegions = [];
     private readonly HashSet<Point> pointsSet = [];
 
+    public string? ActivityMessage
+    {
+        get => area.ActivityMessage;
+        set => area.ActivityMessage = value;
+    }
+    
     public BoundedSquareGrid Area { get; } = area.Area;
     public Random Random { get; } = area.Random;
 

@@ -45,6 +45,9 @@ public partial class DungeonGame : Game
     public static StatefulSpriteBatch WorldSpriteBatch => Instance.worldSpriteBatch;
     private StatefulSpriteBatch worldSpriteBatch = null!;
 
+    public static SpriteFont DebugFont => Instance.debugFont;
+    private SpriteFont debugFont = null!;
+    
     public static StatefulSpriteBatch BackgroundSpriteBatch => Instance.backgroundSpriteBatch;
     private StatefulSpriteBatch backgroundSpriteBatch = null!;
 
@@ -137,6 +140,10 @@ public partial class DungeonGame : Game
 
         imGuiRenderer = new(this);
         imGuiRenderer.RebuildFontAtlas();
+
+        debugFont = Content.Load<SpriteFont>("Fonts/Consolas");
+        
+        Components.Add(new ViewableFPSCounter(this, "Fonts/Consolas", uiSpriteBatch));
     }
 
     protected override void Update(GameTime gameTime)

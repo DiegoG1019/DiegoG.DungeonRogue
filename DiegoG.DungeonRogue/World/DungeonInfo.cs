@@ -22,8 +22,9 @@ public class DungeonInfo : IDebugExplorable
 {
     public delegate void CurrentAreaChangedEventHandler(DungeonInfo dungeon, DungeonArea? newArea);
 
-    public DungeonInfo(int? seed = null, ICollection<int>? mapdescription = null)
+    public DungeonInfo(Game game, int? seed = null, ICollection<int>? mapdescription = null)
     {
+        Game = game;
         var _s = seed ?? RandomNumberGenerator.GetInt32(int.MinValue, int.MaxValue);
         Seed = _s;
         Random = new(_s);
@@ -34,6 +35,7 @@ public class DungeonInfo : IDebugExplorable
     public int Seed { get; }
     public DungeonMap Map { get; }
     public Random Random { get; }
+    public Game Game { get; }
 
     private DungeonArea da_field;
     public DungeonArea CurrentArea => da_field;
@@ -91,5 +93,5 @@ public class DungeonInfo : IDebugExplorable
 
     public IDungeonTileGenerator GetTileGeneratorFor(DungeonFloorId id) => new TestTileGenerator();
 
-    public IDungeonRenderer GetRendererFor(DungeonFloorId id) => new PrerenderToTextureDungeonRenderer();
+    public IDungeonRenderer GetRendererFor(DungeonFloorId id) => new Mesh3DGenerationRenderer(Game);
 }

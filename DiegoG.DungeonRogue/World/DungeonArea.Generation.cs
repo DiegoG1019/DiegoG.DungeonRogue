@@ -11,7 +11,17 @@ namespace DiegoG.DungeonRogue.World;
 
 public partial class DungeonArea
 {
-    public delegate void ActivityMessageChangedEventHandler(DungeonArea context, string? activityMessage);
+    public enum AreaGenerationStage
+    {
+        NotStarted,
+        Layout,
+        Tiles,
+        Finalizing,
+        InitRenderer,
+        Completed
+    }
+    
+    public delegate void ActivityChangedEventHandler(DungeonArea context, string? activityMessage, AreaGenerationStage stage);
     public delegate void ProgressChangedEventHandler(DungeonArea context, float newProgress, float delta);
 
     public TimeSpan GenerationTime { get; private set; }
@@ -23,6 +33,17 @@ public partial class DungeonArea
 
     public float CurrentProgress { get; private set; }
 
+    public AreaGenerationStage GenerationStage
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            ActivityChanged?.Invoke(this, ActivityMessage, value);
+        }
+    }
+
     public string? ActivityMessage
     {
         get;
@@ -30,11 +51,11 @@ public partial class DungeonArea
         {
             if (field == value) return;
             field = value;
-            ActivityMessageChanged?.Invoke(this, value);
+            ActivityChanged?.Invoke(this, value, GenerationStage);
         }
     }
 
-    public event ActivityMessageChangedEventHandler? ActivityMessageChanged;
+    public event ActivityChangedEventHandler? ActivityChanged;
     public event ProgressChangedEventHandler? ProgressChanged;
     private event Action<DungeonArea>? FloorGenerated;
     
@@ -117,18 +138,29 @@ public partial class DungeonArea
             {
                 await Task.Yield();
                 var st = DateTime.Now;
+                GenerationStage = AreaGenerationStage.Layout;
                 var layoutContext = new DungeonAreaLayoutGenerationContext(this);
                 await layoutGen.GenerateLayout(layoutContext);
+                
+                GenerationStage = AreaGenerationStage.Tiles;
                 var results = await tileGen.GenerateTiles(layoutContext, this);
+                
+                GenerationStage = AreaGenerationStage.Finalizing;
                 await FinalizeGeneration(results);
+                
+                GenerationStage = AreaGenerationStage.InitRenderer;
                 await renderer.Initialize(this);
                 Renderer = renderer;
                 GenerationTime = DateTime.Now - st;
+                
                 lock (Random)
                 {
                     FloorGenerated?.Invoke(this);
                     FloorGenerated = null;
                 }
+
+                ActivityMessage = "";
+                GenerationStage = AreaGenerationStage.Completed;
             });
             BackgroundTaskStore.Add(t);
             this.dungeonAreaTask = t;
