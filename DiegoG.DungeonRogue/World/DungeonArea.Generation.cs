@@ -109,6 +109,7 @@ public partial class DungeonArea
         }
 
         Rooms = results.Rooms.ToImmutableArray();
+        Corridors = results.Corridors.ToImmutableArray();
 
         if (DungeonGame.ParsedCommandLine.DumpLevelGraphs)
         {

@@ -31,15 +31,30 @@ public class DrunkardsWalkLayoutGenerator : IDungeonLayoutGenerator
         var cellsToTry = context.Area.TotalCells / cellAmountDivider;
         double exitSetChance = 0;
         double exitSetChanceIncrement = 100.0 / cellsToTry + 10;
-
+        Point start = movementState.Position;
+        Rectangle area = context.Area.TotalCellsRectangle;
+        
         context.ActivityMessage = "Walking a path to generate a map";
         for (int i = 0; i < cellsToTry; i++)
         {
-            if (context.Random.NextSingle() < turnChance)
-                movementState.RandomizeDirection();
+            Debug.Assert(movementState.X >= 0 || movementState.Y >= 0 || movementState.X < area.Width || movementState.Y < area.Height);
             
-            movementState.MoveWithinBounds(context.Area.TotalCellsRectangle, boundsCheckReaction);
+            if (context.Random.NextSingle() < turnChance)
+            {
+                movementState.RandomizeDirection();
+                context.AddCorridor(MakeRectangle(start, movementState.Position));
+                start = movementState.Position;
+                DebugCheck();
+            }
 
+            else if (movementState.TryMoveWithinBounds(area) is false)
+            {
+                context.AddCorridor(MakeRectangle(start, movementState.Position));
+                movementState.MoveWithinBounds(area, boundsCheckReaction);
+                start = movementState.Position;
+                DebugCheck();
+            }
+            
             if (context[movementState.Position] is false)
             {
                 if (exitSetChance >= 0 &&
@@ -66,6 +81,22 @@ public class DrunkardsWalkLayoutGenerator : IDungeonLayoutGenerator
         }
 
         return Task.CompletedTask;
+
+        void DebugCheck()
+        {
+#if DEBUG
+            if (start.X < 0 || start.Y < 0 || start.X >= area.Width || start.Y >= area.Height)
+                Debugger.Break();
+#endif
+        }
+
+        Rectangle MakeRectangle(Point a, Point b)
+            => new(
+                a.X,
+                a.Y,
+                int.Max(int.Abs(a.X - b.X), 1),
+                int.Max(int.Abs(a.Y - b.Y), 1)
+            );
     }
 
     public static DrunkardsWalkLayoutGenerator Default { get; } = new();

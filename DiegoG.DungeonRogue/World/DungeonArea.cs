@@ -48,6 +48,7 @@ public partial class DungeonArea : IDebugExplorable, IProgress<float>
     public Random Random { get; }
     public IDungeonRenderer? Renderer { get; private set; }
     public ImmutableArray<DungeonRoom> Rooms { get; private set; }
+    public ImmutableArray<DungeonRoom> Corridors { get; private set; }
     
     public virtual void RenderImGuiDebug()
     {

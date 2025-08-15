@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 
+
 namespace DiegoG.DungeonRogue.World.WorldGeneration.Generators.TileGenerators;
 
 public class TestTileGenerator : IDungeonTileGenerator
@@ -18,6 +19,9 @@ public class TestTileGenerator : IDungeonTileGenerator
         area.TileData[context.NextFloorExit].Data = TileInfo.Create(TileId.Exit);
 
         area.ActivityMessage = "Creating rooms from layout";
-        return Task.FromResult(new DungeonAreaGenerationResults(context.GetRooms().Select(x => new DungeonRoom(x))));
+
+        var rooms = context.GetRooms().Select(x => new DungeonRoom(x));
+        var corri = context.GetCorridors().Select(x => new DungeonRoom(x));
+        return Task.FromResult(new DungeonAreaGenerationResults(rooms, corri));
     }
 }

@@ -26,7 +26,7 @@ public enum TileFlags : byte
 {
     None = 0,
     RoomTile = 1,
-    B = 1 << 1,
+    Unwalled = 1 << 1,
     C = 1 << 2,
     
     Invalid = 8

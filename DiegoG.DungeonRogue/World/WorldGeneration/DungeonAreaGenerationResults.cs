@@ -7,7 +7,8 @@ namespace DiegoG.DungeonRogue.World.WorldGeneration;
 
 public sealed class DungeonAreaLayoutGenerationContext(DungeonArea area)
 {
-    private readonly List<Rectangle> roomsRegions = [];
+    private readonly HashSet<Rectangle> roomsRegions = [];
+    private readonly HashSet<Rectangle> corridorRegions = [];
     private readonly HashSet<Point> pointsSet = [];
 
     public string? ActivityMessage
@@ -40,12 +41,59 @@ public sealed class DungeonAreaLayoutGenerationContext(DungeonArea area)
     public IEnumerable<Point> GetLayoutPoints()
         => pointsSet;
 
-    public bool IsPointInRoom(Point point)
+    public bool IsPointInCorridor(Point point, out Rectangle rect)
     {
-        for (int i = 0; i < roomsRegions.Count; i++)
-            if (roomsRegions[i].Contains(point)) return true;
+        foreach (var test in corridorRegions)
+        {
+            if (test.Contains(point))
+            {
+                rect = test;
+                return true;
+            }
+        }
+
+        rect = default;
         return false;
     }
+
+    public bool IsPointInCorridor(Point point)
+    {
+        foreach (var test in corridorRegions)
+            if (test.Contains(point)) return true;
+        return false;
+    }
+
+    public bool IsPointInRoom(Point point, out Rectangle rect)
+    {
+        foreach (var test in roomsRegions)
+        {
+            if (test.Contains(point))
+            {
+                rect = test;
+                return true;
+            }
+        }
+
+        rect = default;
+        return false;
+    }
+
+    public bool IsPointInRoom(Point point)
+    {
+        foreach (var test in roomsRegions)
+            if (test.Contains(point)) return true;
+        return false;
+    }
+
+    public void AddCorridor(Rectangle corridorArea)
+    {   
+        for (int darx = 0; darx < corridorArea.Width; darx++)
+        for (int dary = 0; dary < corridorArea.Height; dary++)
+            this[darx + corridorArea.X, dary + corridorArea.Y] = true;
+        corridorRegions.Add(corridorArea);
+    }
+
+    public IEnumerable<Rectangle> GetCorridors() => corridorRegions;
 
     public void AddRoom(Rectangle roomArea)
     {   
@@ -63,7 +111,7 @@ public sealed class DungeonAreaLayoutGenerationContext(DungeonArea area)
     //TODO: Add a list of doors for the other floors. Map out area positions in a previous phase that checks out all floors
 }
 
-public record DungeonAreaGenerationResults(IEnumerable<DungeonRoom> Rooms)
+public record DungeonAreaGenerationResults(IEnumerable<DungeonRoom> Rooms, IEnumerable<DungeonRoom> Corridors)
 {
     
 }
