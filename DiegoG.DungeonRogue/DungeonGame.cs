@@ -79,6 +79,7 @@ public partial class DungeonGame : Game
             if (initialized)
                 args.GameComponent.Initialize();
         };
+        deferrer = Services.AddCallDeferrerService(this);
         
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
@@ -86,7 +87,6 @@ public partial class DungeonGame : Game
             .CreateLogger();
 
         clargs = CommandLine.Parser.Default.ParseArguments<CLArgs>(Environment.GetCommandLineArgs()).Value;
-        deferrer = Services.AddCallDeferrerService(this);
     }
 
     protected override void Initialize()

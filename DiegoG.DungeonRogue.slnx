@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Libraries/">
+    <Project Path="../DiegoG.MonoGame/DiegoG.MonoGame.Extended/DiegoG.MonoGame.Extended.csproj" />
+    <Project Path="../GLV.Shared/GLV.Shared.Common/GLV.Shared.Common.csproj" />
+    <Project Path="../MonoGame.Extended/source/MonoGame.Extended.Content.Pipeline/MonoGame.Extended.Content.Pipeline.csproj" />
+    <Project Path="../MonoGame.Extended/source/MonoGame.Extended/MonoGame.Extended.csproj" />
+    <Project Path="../MonoGame.ImGuiNet/MonoGame.ImGuiNet/Monogame.ImGuiNet.csproj" />
+  </Folder>
+  <Folder Name="/Other/">
+    <Project Path="Benchmarks/Benchmarks.csproj" />
+  </Folder>
+  <Folder Name="/Targets/" />
+  <Project Path="DiegoG.DungeonRogue/DiegoG.DungeonRogue.csproj" />
+</Solution>
